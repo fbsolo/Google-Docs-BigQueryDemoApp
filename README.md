@@ -1,6 +1,6 @@
 At my blog
 
-bitvectors.blogspot.com
+http://bitvectors.blogspot.com
 
 article
 
