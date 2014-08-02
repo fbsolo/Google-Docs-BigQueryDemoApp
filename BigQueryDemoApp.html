@@ -1,0 +1,524 @@
+<!--
+
+  Article
+
+    http://bitvectors.blogspot.com/2014/07/page1.html
+
+  uses this application . . .
+
+  -->
+
+<HTML>
+  <HEAD>
+    <SCRIPT src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></SCRIPT>
+    <SCRIPT src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></SCRIPT>
+
+    <!--
+        CSS style to right-align the quantiles dropdown . . .
+      -->
+
+    <STYLE TYPE="TEXT/CSS">
+      SELECT {
+        TEXT-ALIGN:RIGHT;   
+      }
+    </STYLE>
+
+    <SCRIPT TYPE="text/javascript">
+
+      //  Multiple Javascript functions will use
+      //  this array, so make it global . . .
+
+      var DDLArray = [
+                       "#DDLZIP",
+                       "#DDLEMP",
+                       "#DDLQP1",
+                       "#DDLAP",
+                       "#DDLEST",
+                       "#DDLQUERY",
+                       "#DDLQUANTILES"
+                     ];
+
+      function callBack(resultSetParam) {
+
+        //  First, clean out all the result set rows from the
+        //  previous run. These start after the TR row with
+        //  ID = 'lastRow' . . .
+
+        $('#lastRow').nextAll().remove();
+
+        //  The first element of array resultSetParam is itself a two-element
+        //  array. For a quantiles function result set, resultSetParam[0] has
+        //  this structure
+        //
+        //    resultSetParam[0][0] = 'QUANTILE NUMBER'
+        //    resultSetParam[0][1] = 'QUANTILE VALUE'
+        //
+        //  and starting at element 2, resultSetParam has one-element arrays
+        //  that will then switch between the QUANTILE NUMBER column on the
+        //  left
+        //
+        //    resultSetParam[i]
+        //
+        //  and the QUANTILE VALUE column on the right
+        //
+        //    resultSetParam[i + 1]
+        //
+
+        if (resultSetParam.length == 1) {
+
+          //  For a single-value result set, bold / underline the function name . . .
+
+          $('#mainTable tr:last').after('<tr><td></td><td></td><<td COLSPAN="2" valign="top"><b>' + resultSetParam[0][0] + ':</b></td><td COLSPAN="2" valign="top">' + resultSetParam[0][1] + '</td></tr>');
+        }
+        else if (resultSetParam.length > 1) {
+
+          //  A quantiles function result set will have the column headings bolded / underlined . . .
+
+          $('#mainTable tr:last').after('<tr><td></td><td></td><<td COLSPAN="2" valign="top"><b><u>' + resultSetParam[0][0] + '</u></b></td><td COLSPAN="2" valign="top"><b><u>' + resultSetParam[0][1] + '</u></b></td></tr>');
+
+          //  Append the result set values to mainTable . . . 
+
+          for (var i = 1; i < resultSetParam.length; i++) {
+            $('#mainTable tr:last').after('<tr><td></td><td></td><td COLSPAN="2" valign="top">' + resultSetParam[i][0] + '</td><td COLSPAN="2" valign="top">' + resultSetParam[i][1] + '</td></tr>');
+          }
+        }
+      }
+
+      function submitData() {
+
+        //  The arrayParam array will become a parameter passed to the returnFormParams
+        //  function in file
+        //
+        //    Code.gs
+        //
+        //  That function will show the query parameter(s) and result set on the
+        //  associated spreadsheet.
+        //
+        //  Except for element six, initialize the array with "ANY" values as a default
+        //  because all dropdowns themselves initialize with a value of "ANY". This value
+        //  in the BigQuery query string means the user did not make a pick in the corresponding
+        //  dropdown. In arrayParam, element six depends on the quantiles function of the
+        //  DDLQUERY dropdown, so default this element to " " . . . .
+
+        //  Element 5 in arrayParam has the DDLQUERY text; element 7 has the DDLQUERY
+        //  value. Remember that arrays have zero-based numbering ! ! !
+
+        var arrayParam = [
+                           "ANY",
+                           "ANY",
+                           "ANY",
+                           "ANY",
+                           "ANY",
+                           "ANY",
+                           " ",
+                           "ANY"
+                         ];
+
+        var form = document.getElementById('BigQueryDemoApp');
+
+        var queryString = 'SELECT ';
+        var alertString = '';
+
+        //  Map the values in DDLArray above to DOM elements on the form
+        //  through jQuery.
+        //
+        //  Starting with element five (the sixth element) in DDLArray (the
+        //  queries dropdown), build a jQuery statement that returns the
+        //  value picked in the queries dropdown itself. Then, use that
+        //  value in the nearby switch statement. Here, case "4" maps to
+        //  the BigQuery quantiles function. This function needs a quantiles
+        //  value, and this value will come from the quantiles dropdown
+        //  DDLQUANTILES.
+        //
+        //  Array element
+        //
+        //    arrayParam[5]
+        //
+        //  has the DDLQUERY text. Starting with this value, place its mapped
+        //  text value in arrayParam[5] and its mapped OPTION VALUE in
+        //  arrayParam[7] . . .
+
+        arrayParam[5] = $(DDLArray[5] + " option:selected").text();
+        arrayParam[7] = $(DDLArray[5] + " option:selected").val();
+
+        //  Array element arrayParam[6] holds the QUANTILES value. Since only the
+        //  quantiles function in the DDLQUERY dropdown needs this value, default
+        //  arrayParam[6] to " " and have case "4" in the switch block set the
+        //  value for this array element . . .
+
+        arrayParam[6] = " ";
+
+        //  Fill the DDLQUERY dropdown, used to pick the BigQuery function.
+        //  In the column aliases, map the "formatting" values with Unicode
+        //  equivalents 
+        //
+        //      $ <-> x24
+        //      ( <-> x28
+        //      ) <-> x29
+        //      = <-> x3d
+        //      ^ <-> x5e
+        //
+        //  because character escapes won't work in BigQuery SELECT column
+        //  aliasing . . .
+
+        //  Start building the query string that
+        //  the app will send to BigQuery . . .
+
+        switch($(DDLArray[5] + " option:selected").val()) {
+          case "1":
+            queryString += "STDDEV(QP1) AS STDDEV_QUARTERLY_PAYROLL_x281_x3d_x24_1Kx29 ";
+            break;
+          case "2":
+            queryString += "AVG(AP) AS AVG_TOTAL_ANNUAL_PAYROLL_x281_x3d_x24_1Kx29 ";
+            break;
+          case "3":
+            queryString += "VARIANCE(EST) AS VARIANCE_TOTAL_ESTABLISHMENT_COUNT_x281_x3d_COUNTx5e2x29 ";
+            break;
+          case "4":
+
+            //  The user picked the QUANTILES function, so build queryString as needed and
+            //  place the QUANTILES interval count value in arrayParam[6] . . .
+
+            queryString += "ROW_NUMBER() OVER (ORDER BY QUANTILE_VALUES) AS QUANTILE_NUMBER, ";
+            queryString += "QUANTILES(EMP, " + $(DDLArray[6] + " option:selected").val() + ") AS QUANTILE_VALUES ";
+            arrayParam[6] = $(DDLArray[6] + " option:selected").text();
+            break;
+        }
+
+        //  BigQuery expects to see
+        //
+        //    {dataset name}.{table name}
+        //
+        //  in the FROM clause . . .
+
+        queryString += "FROM BigQueryDemoAppDS.zbp11totals WHERE ";
+
+        //  Zip code value works a little differently in the WHERE
+        //  clause. To get the actual zip code value picked, build
+        //  a jQuery statement that returns the value picked in the
+        //  dropdown itself. DDLArray[0] maps to the zip code
+        //  dropdown - IOW, ZIP is the first dropdown . . .
+
+        if ($(DDLArray[0] + " option:selected").val() != 'ANY') {
+          queryString += "ZIP LIKE '" + $(DDLArray[0] + " option:selected").val() + "%'";
+          arrayParam[0] = $(DDLArray[0] + " option:selected").text();
+        }
+
+        for (var i = 1; i < (DDLArray.length - 2); i++) {
+
+        //  Now loop through the dropdowns DDLArray maps, after ZIP and
+        //  before the DDLQuery and DDLQuantiles dropdowns. Only add
+        //  columns / values to the queryString WHERE clause if the
+        //  picked dropdown value is not 'ANY'. Ignore the last two
+        //  values in DDLArray because they deal with the query and
+        //  quantiles dropdowns. The switch / case block above handled
+        //  these dropdowns. The zip code dropdown is DDLArray[0], so
+        //  start this for-loop at 1 . . .
+
+          if (($(DDLArray[i] + " option:selected").val()) != 'ANY') {
+
+          //  If the picked dropdown value is not 'ANY', first call endOfQueryString
+          //  to add an ending AND to the end of queryString. Then, use DDLArray[i]
+          //  as the basis to get the column name. In array DDLArray, the dropdown
+          //  names map to the column names but the dropdown names start with "DDL".
+          //  Therefore, use slice() to strip off the first three characters. Then,
+          //  build a jQuery statement that returns the value picked in the dropdown
+          //  itself, and use this value in the BETWEEN clause. Finally, change / update
+          //  the mapped value for the dropdown in the arrayParam[] array . . .
+
+            queryString += endOfQueryString(queryString);
+            queryString += ' ' + DDLArray[i].slice(4) + ' BETWEEN ' + $(DDLArray[i] + " option:selected").val();
+            arrayParam[i] = $(DDLArray[i] + " option:selected").text();
+          }
+        }
+
+        //  Maybe queryString value ended with "WHERE " because the user
+        //  picked no parameters. Delete that ending "WHERE " in this
+        //  case . . .
+
+        if (queryString.slice(-6) == 'WHERE ') {
+          queryString = queryString.slice(0, -6);
+        }
+
+        //  This statement calls returnFormParams in Code.gs to make the calculations on the
+        //  spreadsheet. The syntax might look a little strange, but when called, function
+        //  returnFormParams returns the BigQuery calculation results (as returnParam within
+        //  that function); this line then passes that parameter to function callBack, located
+        //  in this HTML file.
+        //
+        //  Function callBack writes the value(s) in this "invisible" parameter starting
+        //  just after the HTML element at DOM ID location
+        //
+        //    tr:last
+        //
+        //  in the HTML file that this file draws . . .
+
+        google.script.run.withFailureHandler(alertString).withSuccessHandler(callBack).returnFormParams(queryString, arrayParam);
+      }
+
+      function endOfQueryString(queryString) {
+
+      //  If the queryString does not end with
+      //  " WHERE", this function returns " AND".
+      //  In these cases, parameter queryString
+      //  ends with a column name . . .
+
+        var endOfString = " ";
+
+        if (queryString.slice(-6) != 'WHERE ') {
+          endOfString = " AND";
+        }
+
+        return endOfString;
+      }
+
+      //  This jQuery function runs as soon as the HTML page
+      //  completely loads. It first hides the quantiles
+      //  dropdown by default. Then, it fills the dropdown
+      //  with 98 integers from 3 to 100 . . .
+
+      $(document).ready(function() {
+
+        //  Directly hide the DDLQUANTILES dropdown
+        //  and the label associated with it . . .
+
+        $("#DDLQUANTILES").hide();
+        $('LABEL[FOR="DDLQUANTILES"]').hide();
+
+        var ddlQuantilesString = '<SELECT NAME="DDLQUANTILES" CLASS="DDLQUANTILES" ID="DDLQUANTILES" SIZE="4" DIR="RTL">';
+        ddlQuantilesString += '<OPTION SELECTED="true" VALUE="2">2</OPTION>'
+
+        for (var i = 3; i < 101; i++){
+          ddlQuantilesString += '<OPTION VALUE="' + i + '">' + i + '</OPTION>';
+        }
+
+        ddlQuantilesString += '</SELECT>';
+
+        $('#DDLQUANTILES').html(ddlQuantilesString);
+
+      });
+
+      //  This jQuery function ties the DDLQUANTILES quantiles dropdown and associated
+      //  labels to the DDLQUERY query dropdown. DDLQUANTILES becomes visible when the
+      //  user picks
+      //
+      //    "QUANTILES EMPLOYEE COUNT" <=> 4
+      //
+      //  and invisible for the other picks . . .
+
+      $(document).ready(function () {
+
+        //  This file has array DDLArray globally visible and this function maps
+        //  array DDLArray values to DOM elements on this form
+        //
+        //    DDLArray[5] -> #DDLQUERY
+        //
+        //    DDLArray[6] -> #DDLQUANTILES
+        //
+        //  through array DDLArray . . .
+
+        $(DDLArray[5]).change(function () {
+
+        //  First, build a jQuery statement that returns the value
+        //  picked in the queries dropdown itself and use that
+        //  value in the switch statement.
+
+        //  Use fadeTo because the hide() and show() methods will
+        //  physically remove / replace the DDLQuery dropdown and
+        //  the label associated with it and the controls / cells / etc.
+        //  below them will start moving around vertically. In fadeTo, the
+        //  first parameter is speed. Zero -> instant; the second
+        //  parameter is opacity. One -> 100% opacity (AKA fully
+        //  non-transparent); zero -> 0% opacity (AKA clear) . . .        
+
+          if (($(DDLArray[5] + " option:selected").val()) === "4") {
+            $(DDLArray[6]).fadeTo(0, 1);
+            $('LABEL[FOR="DDLQUANTILES"]').fadeTo(0, 1);
+          } else {
+            $(DDLArray[6]).fadeTo(0, 0);
+            $('LABEL[FOR="DDLQUANTILES"]').fadeTo(0, 0);
+          }
+        });  
+      });
+
+      //  This jQuery function resets all the dropdowns to their first / top
+      //  values. To run this function, click the RESET button . . .
+
+      $(function() {
+        $("#RESET").click( function() {
+
+          //  The actual dropdown resets happen here . . .
+
+          for (var i = 0; i < DDLArray.length; i++) {
+            $(DDLArray[i]).val( $(DDLArray[i] + " option:first-child").val() );
+          }
+
+          //  When DDLQUERY resets, hide everything associated
+          //  with DDLQUANTILES, because the selected pick in
+          //  DDLQUERY will become
+          //
+          //    STTDEV Q1 PAYROLL
+          //
+          //  and this query function does not use a
+          //  DDLQUANTILES value . . .
+
+          $('#DDLQUANTILES').hide();
+          $('LABEL[FOR="DDLQUANTILES"]').hide();
+
+          //  Remember to clean out the
+          //  result set cells . . .
+
+          $('#lastRow').nextAll().remove();
+        });
+      });
+
+    </SCRIPT>
+
+  </HEAD>
+
+  <BODY>
+
+    <FORM ID="BigQueryDemoApp">
+
+    <!--
+        Use
+        
+          http://www.tablesgenerator.com/html_tables#
+        
+        to build the HTML for the form . . .
+      -->
+
+      <STYLE type="text/css">
+        .tg {border-collapse:collapse;border-spacing:0;border:none;}
+        .tg TD{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg TH{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg .tg-DROPDOWNHEADING{font-weight:bold;font-size:18px;font-family:"Times New Roman", Times, serif !important; text-align:center;}
+        .tg .tg-TITLE{font-weight:bold;font-size:28px;font-family:"Times New Roman", Times, serif !important;text-align:center}
+        .tg .CENTER_DROPDOWN{text-align:center;}
+      </STYLE>
+      <TABLE CLASS="tg" STYLE="undefined;table-layout: fixed; WIDTH: 1031px" ID="mainTable">
+        <COLGROUP>
+          <COL STYLE="WIDTH: 131px">
+          <COL STYLE="WIDTH: 218px">
+          <COL STYLE="WIDTH: 217px">
+          <COL STYLE="WIDTH: 191px">
+          <COL STYLE="WIDTH: 131px">
+          <COL STYLE="WIDTH: 250px">
+        </COLGROUP>
+        <TR>
+          <TH CLASS="tg-TITLE" COLSPAN="5">CENSUS BUREAU<BR>COMPLETE ZIP CODE TOTALS FILE<BR>BIG QUERY APPLICATION</TH>
+          <TH ROWSPAN="3"></TH>
+        </TR>
+        <TR>
+          <TD CLASS="tg-DROPDOWNHEADING">First Zip<BR>Digit</TD>
+          <TD CLASS="tg-DROPDOWNHEADING">Employee<BR>Count</TD>
+          <TD CLASS="tg-DROPDOWNHEADING">Q1 Payroll<BR>(1 = $ 1K)</TD>
+          <TD CLASS="tg-DROPDOWNHEADING">Total Annual<BR>Payroll (1 = $ 1K)</TD>
+          <TD CLASS="tg-DROPDOWNHEADING">Total<BR>Establishment<BR>Count</TD>
+        </TR>
+        <TR>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLZIP" ID="DDLZIP" SIZE="6">
+              <OPTION SELECTED="true" VALUE="ANY">ANY</OPTION>
+              <OPTION VALUE="0">0</OPTION>
+              <OPTION VALUE="1">1</OPTION>
+              <OPTION VALUE="2">2</OPTION>
+              <OPTION VALUE="3">3</OPTION>
+              <OPTION VALUE="4">4</OPTION>
+              <OPTION VALUE="5">5</OPTION>
+              <OPTION VALUE="6">6</OPTION>
+              <OPTION VALUE="7">7</OPTION>
+              <OPTION VALUE="8">8</OPTION>
+              <OPTION VALUE="9">9</OPTION>
+            </SELECT>
+          </TD>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLEMP" TYPE="SELECT" ID="DDLEMP" SIZE="6">
+              <OPTION SELECTED="true" VALUE="ANY">ANY</OPTION>
+              <OPTION VALUE="0 AND 10">0 &lt; 10</OPTION>
+              <OPTION VALUE="10 AND 100">10 &lt; 100</OPTION>
+              <OPTION VALUE="100 AND 1000">100 &lt; 1 K</OPTION>
+              <OPTION VALUE="1000 AND 10000">1 K &lt; 10 K</OPTION>
+              <OPTION VALUE="10000 AND 100000">10 K &lt; 100 K</OPTION>
+              <OPTION VALUE="100000 AND 1000000">100 K &lt; 1 M</OPTION>
+            </SELECT>
+          </TD>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLQP1" ID="DDLQP1" SIZE="6">
+              <OPTION SELECTED="true" VALUE="ANY">ANY</OPTION>
+              <OPTION VALUE="0 AND 10">0 &lt; 9</OPTION>
+              <OPTION VALUE="10 AND 100">10 &lt; 100</OPTION>
+              <OPTION VALUE="100 AND 1000">100 &lt; 1 K</OPTION>
+              <OPTION VALUE="1000 AND 10000">1 K &lt; 10 K</OPTION>
+              <OPTION VALUE="10000 AND 100000">10 K &lt; 100 K</OPTION>
+              <OPTION VALUE="100000 AND 1000000">100 K &lt; 1 M</OPTION>
+              <OPTION VALUE="1000000 AND 10000000">1 M &lt; 10 M</OPTION>
+              <OPTION VALUE="10000000 AND 100000000">10 M &lt; 100 M</OPTION>
+              <OPTION VALUE="100000000 AND 1000000000">100 M &lt; 1 B</OPTION>
+            </SELECT>
+          </TD>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLAP" ID="DDLAP" SIZE="6">
+              <OPTION SELECTED="true" VALUE="ANY">ANY</OPTION>
+              <OPTION VALUE="0 AND 10">0 &lt; 9</OPTION>
+              <OPTION VALUE="10 AND 100">10 &lt; 100</OPTION>
+              <OPTION VALUE="100 AND 1000">100 &lt; 1 K</OPTION>
+              <OPTION VALUE="1000 AND 10000">1 K &lt; 10 K</OPTION>
+              <OPTION VALUE="10000 AND 100000">10 K &lt; 100 K</OPTION>
+              <OPTION VALUE="100000 AND 1000000">100 K &lt; 1 M</OPTION>
+              <OPTION VALUE="1000000 AND 10000000">1 M &lt; 10 M</OPTION>
+              <OPTION VALUE="10000000 AND 100000000">10 M &lt; 100 M</OPTION>
+              <OPTION VALUE="100000000 AND 1000000000">100 M &lt; 1 B</OPTION>
+              <OPTION VALUE="1000000000 AND 10000000000">1 B &lt; 10 B</OPTION>
+            </SELECT>
+          </TD>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLEST" ID="DDLEST" SIZE="6">
+              <OPTION SELECTED="true" VALUE="ANY">ANY</OPTION>
+              <OPTION VALUE="0 AND 10">0 &lt; 9</OPTION>
+              <OPTION VALUE="10 AND 100">10 &lt; 99</OPTION>
+              <OPTION VALUE="100 AND 1000">100 &lt; 999</OPTION>
+              <OPTION VALUE="1000 AND 10000">1 K &lt; 10 K</OPTION>
+              <OPTION VALUE="10000 AND 100000">10 K &lt; 100 K</OPTION>
+            </SELECT>
+          </TD>
+        </TR>
+        <TR>
+          <TD COLSPAN="5"></TD>
+          <TD><INPUT TYPE="button" ID="SUBMIT" ONCLICK="submitData();" VALUE="SUBMIT"/></TD>
+        </TR>
+        <TR>
+          <TD COLSPAN="5"></TD>
+          <TD><INPUT TYPE="button" ID="RESET" VALUE="RESET"/></TD>
+        </TR>
+        <TR>
+          <TD CLASS="tg-DROPDOWNHEADING" COLSPAN="2"><LABEL>Function for<BR>Select Clause</LABEL></TD>
+          <TD></TD>
+          <TD CLASS="tg-DROPDOWNHEADING" VALIGN="TOP"><LABEL FOR="DDLQUANTILES"; text-align:center;>Number of<BR>Quantiles</LABEL></TD>
+          <TD ROWSPAN="2"></TD>
+          <TD></TD>
+        </TR>
+        <TR ID="lastRow">
+          <TD CLASS="CENTER_DROPDOWN" COLSPAN="2" VALIGN="TOP">
+            <SELECT NAME="DDLQUERY" CLASS="DDLQUERY" ID="DDLQUERY" SIZE="4">
+              <OPTION VALUE="1" SELECTED="true">STTDEV Q1 PAYROLL</OPTION>
+              <OPTION VALUE="2">AVG TOTAL ANNUAL PAYROLL</OPTION>
+              <OPTION VALUE="3">VARIANCE TOTAL ESTABLISHMENT COUNT</OPTION>
+              <OPTION VALUE="4">QUANTILES EMPLOYEE COUNT</OPTION>
+            </SELECT>
+          </TD>
+          <TD CLASS="tg-DROPDOWNHEADING" VALIGN="top"><LABEL FOR="DDLQUANTILES" style="color: #FFFFFF; background-color:gray"; >(pick the number of quantiles -&gt;)</LABEL></TD>
+          <TD CLASS="CENTER_DROPDOWN">
+            <SELECT NAME="DDLQUANTILES" CLASS="DDLQUANTILES" ID="DDLQUANTILES" SIZE="10">
+              <OPTION VALUE=1 SELECTED="true">1</OPTION>
+              <OPTION VALUE=2>2</OPTION>
+              <OPTION VALUE=3>3</OPTION>
+              <OPTION VALUE=4>4</OPTION>
+            </SELECT>
+          </TD>
+        </TR>
+      </TABLE>
+
+    </FORM>
+  </BODY>
+</HTML>
