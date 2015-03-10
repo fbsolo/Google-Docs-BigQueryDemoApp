@@ -1,71 +1,89 @@
-// Article
+//  Article
 //
-//   http://bitvectors.blogspot.com/2014/12/page1.html
+//    http://bitvectors.blogspot.com/2014/07/page1.html
 //
-// describes this application . . .
+//  describes this application . . .
 
-// The doGet() and runQuery() functions
-// and the onOpen() trigger all see the
-// spreadsheet, so declare these next
-// variables globally.
+//  The doGet() and runQuery() functions
+//  and the onOpen() trigger all see the
+//  spreadsheet, so declare these next
+//  variables globally.
 
-// Use a PropertiesService object to store the
-// relevant database / connection values. Store
-// them here to make it easier to manage them
-// across different situations. The spreadSheetURL
-// value has the specific Google Docs Spreadsheet
-// for this application.
+//  Set variable
 //
-// In the setProperty functions, replace the empty
-// string values in the second parameter with the
-// actual database, connection, and spreadsheet
-// URL values . . .
+//    spreadSheetURL
+//
+//  to the Google Docs
+//  spreadsheet URL value . . .
 
-var scriptProperties = PropertiesService.getScriptProperties();
-
-scriptProperties.setProperty('db', '');
-scriptProperties.setProperty('address', '');
-scriptProperties.setProperty('user', '');
-scriptProperties.setProperty('userPwd', '');
-scriptProperties.setProperty('spreadSheetURL', '');
-
-var localSpreadSheet = SpreadsheetApp.openByUrl(scriptProperties.getProperty('spreadSheetURL'));
+var spreadSheetURL = 'https://docs.google.com                                                                       ';
+var localSpreadSheet = SpreadsheetApp.openByUrl(spreadSheetURL);
 
 function onOpen()
 {  
-  // Set up the header cells and spreadsheet
-  // formatting when the spreadsheet loads.
-  // This way, the Code.gs and CloudSQLDemoApp.html
-  // files can build the spreadsheet themselves
-  // with minimal developer / user involvement . . .
+  //  Set up the header cells and spreadsheet
+  //  formatting when the spreadsheet loads.
+  //  This way, the Code.gs and BigQueryDemoApp.html
+  //  files can build the spreadsheet themselves
+  //  with minimal developer / user involvement . . .
 
-  // These lines set cell values, format the sheet, etc.
-  // For cell range A2:F2 the background color #c9daf8
-  // draws a light blue . . .
+  //  This function will place the headerArray array
+  //  values in spreadsheet cell range A2:G2. Use \n
+  //  as a line break for cell text
 
-  localSpreadSheet.getRange("A1:E2").setFontFamily("TimesNewRoman");
-  localSpreadSheet.getRange("A1:E2").setHorizontalAlignment("center");
-  localSpreadSheet.getRange("A1").setValue("CLOUD SQL GOOGLE APPS SCRIPT RECURSION\nAPPLICATION TO UNPACK AN INTEGER\nINTO ITS BASE-10 MULTIPLE-OF-TWO COMPONENTS");
-  localSpreadSheet.getRange("A1:F1").merge();
-  localSpreadSheet.getRange("A1:F1").setFontWeight("bold");
-  localSpreadSheet.getRange("A1:F1").setFontSize(24);
-  localSpreadSheet.getRange("A2:F2").setBackground("#c9daf8");
-  localSpreadSheet.getRange("A2:F2").merge();
+  //  If needed, this next line could clean out the
+  //  cells
+  //
+  //    A4:G107
+  //
+  //  where the application writes but we'll leave
+  //  them for now . . .
 
-  localSpreadSheet.setColumnWidth(1, 41);
-  localSpreadSheet.setColumnWidth(2, 194);
-  localSpreadSheet.setColumnWidth(3, 65);
-  localSpreadSheet.setColumnWidth(4, 96);
+  //  localSpreadSheet.getRange('A4:G107').setValue(' ');. . .
+  
+  var headerArray = [
+                      "First Zip\nDigit",
+                      "Employee\nCount",
+                      "Q1 Payroll\n(1 = $ 1K)",
+                      "Total Annual Payroll\n(1 = $ 1K)",
+                      "Total Establishment\nCount",
+                      "Function for\nSelect Clause",
+                      "Number of\nQuantiles"
+                    ];
+
+  //  These lines set cell values, format the sheet, etc.
+  //  For cell range A3:G3 the background color #c9daf8
+  //  draws a light blue . . .
+
+  localSpreadSheet.getRange("A1:G2").setFontFamily("TimesNewRoman");
+  localSpreadSheet.getRange("A1:G4").setHorizontalAlignment("center");
+  localSpreadSheet.getRange("B6").setWrap(true);
+  localSpreadSheet.getRange("B6:C106").setHorizontalAlignment("right");
+  localSpreadSheet.getRange("A1").setValue("CENSUS BUREAU\nCOMPLETE ZIP CODE\nTOTALS FILE");
+  localSpreadSheet.getRange("A1:G1").merge();
+  localSpreadSheet.getRange("A1:G2").setFontWeight("bold");
+  localSpreadSheet.getRange("A1:G1").setFontSize(24);
+  localSpreadSheet.getRange("A2:G2").setFontSize(18);
+  localSpreadSheet.getRange("A3:G3").setBackground("#c9daf8");
+  localSpreadSheet.getRange("A3:G3").merge();
+  localSpreadSheet.getRange('A4:G107').setFontFamily("Arial");
+  localSpreadSheet.getRange("A4:G107").setFontSize(10);
+
+  //  The setValues function takes an array as a parameter, but it
+  //  wants a multi-dimensional array. To do this, wrap the array
+  //  it will get inside an array of its own . . .
+
+  localSpreadSheet.getRange("A2:G2").setValues([headerArray]);
+
+  //  Set the column width values . . .
+  
+  localSpreadSheet.setColumnWidth(1, 126);
+  localSpreadSheet.setColumnWidth(2, 126);
+  localSpreadSheet.setColumnWidth(3, 150);
+  localSpreadSheet.setColumnWidth(4, 229);
   localSpreadSheet.setColumnWidth(5, 218);
   localSpreadSheet.setColumnWidth(6, 226);
-
-  localSpreadSheet.getRange("B4").setValue("Raw Integer to Unpack Into\nBase-10 Multiples of Two:");
-  localSpreadSheet.getRange("B6").setValue("Base-10 Multiple-of-Two\nComponents");
-  localSpreadSheet.getRange("F6").setValue("Comma-Delimited List of the\nBase-10 Multiple of Two\nComponents");
-
-  localSpreadSheet.getRange("B4:F6").setHorizontalAlignment("center");
-
-  localSpreadSheet.getRange("B4:F6").setFontWeight("bold");
+  localSpreadSheet.setColumnWidth(7, 127);
 }
 
 function clearSheet(){
@@ -74,12 +92,12 @@ function clearSheet(){
   //
   //     CloudSQLDemoApp.html
   //
-  // will call this function. This function clears out the
+  // will call this function. This funtion clears out the
   // data in the spreadsheet to mirror the web page
-  // behavior. . .
-
-  localSpreadSheet.getRange("C4").clear();
-  localSpreadSheet.getRange("B8:F23").clear();
+  // behavior . . .
+  
+     localSpreadSheet.getRange("C4").clear();
+     localSpreadSheet.getRange("A4:F106").clear();
 }
 
 function doGet(){
@@ -88,175 +106,197 @@ function doGet(){
   //  This function loads the HTML file BigQueryDemoApp.html in
   //  the browser . . .
 
-  return HtmlService.createTemplateFromFile("CloudSQLDemoApp.html").evaluate();
+  return HtmlService.createTemplateFromFile("BigQueryDemoApp.html").evaluate();
 }
 
-function returnFormParams(spinnerVal){
+function returnFormParams(queryString, 
+                          arrayParam
+                         ){
 
-  // This function queries the MySQL database and calls other
-  // functions to write the result set(s) on the spreadsheet
-  // and the HTML page.
-  //
-  // First, use properties from the scriptProperties object
-  // declared / set earlier to set up the database connection
-  // so that this app can actually talk with the MySQL
-  // database . . .
+  //  The last line of submitData() in BigQueryDemoApp.html
+  //  called this function. This function will build and
+  //  return the BigQuery result set back to submitData().
 
-  var db = scriptProperties.getProperty('db');
-  var address = scriptProperties.getProperty('address');
-  var dbUrl = 'jdbc:mysql://' + address + '/' + db;
-
-  var user = scriptProperties.getProperty('user');
-  var userPwd = scriptProperties.getProperty('userPwd');
-
-  // Set up the stored procedure calls . . .
-
-  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
-  var stmt1 = conn.prepareCall("{call usp_return_tbl_of_values(?)}");
-  var stmt2 = conn.prepareCall("{call usp_return_comma_dlm_string(?)}");
-
-  //  Hardwire the second parameter - an input parameter - to the spinnerVal value for stmt1 . . .
-
-  stmt1.setInt(1, spinnerVal);
-
-  //  Hardwire the second parameter - an input parameter - to the spinnerVal value for stmt2 . . .
-
-  stmt2.setInt(1, spinnerVal);
-
-  // An executeQuery result set is forward-only and potentially expensive,
-  // so try to call it once and then clean / restructure / etc. the result
-  // set(s) if possible . . .
-
-  var results1 = stmt1.executeQuery();
-  var results2 = stmt2.executeQuery();
-
-  // Arbitrarily hardwire the spreadsheet
-  // target locations for the result
-  // sets . . .
-
-  var firstTargetRange = 'B8';
-  var secondTargetRange = 'F8';
-
-  // Call writeResults to write the result sets on the spreadsheet
-  // and write HTML string equivalents of those result sets. These
-  // HTML string equivalents will draw HTML result set equivalents
-  // on the HTML form. The resultsArray[n] variables hold those
-  // strings. Variable resultsArray1 holds a two-dimensional
-  // result set and resultsArray2 holds a comma-delimited list
-  // of the base-10 multiple-of-two integer components of the
-  // spinnerVal integer . . .
-
-  var resultsArray1 = writeResults(results1, firstTargetRange);
-  var resultsArray2 = writeResults(results2, secondTargetRange);
-
-  // Close the database connectivity variables ASAP . . .
-
-  stmt1.close();
-  stmt2.close();
-
-  results1.close();
-  results2.close();
-
-  conn.close();
-
-  // Write the integer number value
-  // spinnerVal in cell C4 . . .
-
-  localSpreadSheet.getRange("C4").setValue(spinnerVal);
-
-  // Place the result set HTML strings first for the two-dimensional
-  // result set and second for the comma-delimited component integer
-  // string in an array, and return it from the function . . .
-
-  var resultSetArray = Array(resultsArray1, resultsArray2);
-  return resultSetArray;
-}
-
-function writeResults(results, topLeftCell) {
-
-  // Write the result set on localSpreadSheet as a range, placing
-  // the upper left cell of results at cell topLeftCell . . .
-
-  var startLocation = localSpreadSheet.getRange(topLeftCell);
-  var rangeCol = topLeftCell.substr(0, 1);
-  var rangeRow = topLeftCell.substr(1, 1);
-
-  var colVar = 0;
-  var rowVar = 0;
-
-  // See
-  //
-  //    https://developers.google.com/apps-script/reference/spreadsheet/range#offset(Integer,Integer,Integer,Integer)
-  //
-  // for more about the offset method. The "derived"
-  // range clearRange starts at the upper left of
-  // the topLeftCell parameter (essentially cell
-  // topLeftCell itself because this cell is one
-  // row / one column) and extends sixteen rows
-  // and two columns because the results row set
-  // will have at most this row / column count . . .
-
-  var clearRange = startLocation.offset(0, 0, 16, 4);
-  clearRange.clear();
-  clearRange.setHorizontalAlignment("right");
-
-  // From
-  //
-  //   https://www.google.com/webhp?sourceid=chrome-instant&rlz=1C1VFKB_enUS615US615&ion=1&espv=2&ie=UTF-8#q=JDBC+executequery+google+apps+script
-  //
-  // and
-  //
-  //   http://stackoverflow.com/questions/20509025/google-app-script-jdbc-connection-executequery-returns-only-one-result
-  //
-  // build a function to dynamically place a result set on a designated place on a sheet. In a two-column result
-  // set, column 1 has label equivalents, like
-  //
-  //   SIXTH      (2 ^  6)
-  //
-  // and column 2 has the actual component integer values. Variable sumVals will sum the column 2 values for placement
-  // in cell C4. This cell is arbitrarily chosen.
-
-  // The resultsString will draw HTML rows on the
-  // form, so start off with a <tr> tag . . .
-
-  var resultsString = "<tr>";
-
-  // Use results.next() in a while loop even for a one-row result set.
-  // This is the only way Google Apps Script can see the actual result
-  // set values.
+  //  Spreadsheet range A4:G107 covers all cells
+  //  that function runQuery could potentially
+  //  write . . .
   
-  // Look at each row in results: the result set variable. Inside each
-  // row, extract each (column) value and write it on the spreadsheet.
-  // The startLocation.offset determines the exact cell location for
-  // the value. The getStrng(colVar + 1) part extracts the relevant
-  // value from the results result set row. Note that here, result set
-  // columns start at 1, not zero. This means add 1 to colVar to
-  // compensate. . .
+  localSpreadSheet.getRange('A4:G107').setValue(' ');
 
-  // The results record set is forward-only, so we have no way to see the exact
-  // number of rows it has. Therefore, parse it with a while-loop . . .
+  //  This line will place the first six elements of arrayParam
+  //  in cells A4:G4 respectively. Here, arrayParam[7] has the
+  //  DDLQUERY value, not the text. Therefore, it does not belong
+  //  in the A4:G4 range.
+  //
+  //  The setValues function takes an array as a parameter, but it
+  //  wants a multi-dimensional array. To do this, wrap the array
+  //  it will get inside an array of its own . . .
 
-  while (results.next()) {
-    for (colVar = 0; colVar < results.getMetaData().getColumnCount(); colVar++) {
-      startLocation.offset(rowVar, colVar).setValue(results.getString(colVar + 1));
-      resultsString += '<td>' + results.getString(colVar + 1) + '</td>';
-    }
+  localSpreadSheet.getRange("A4:G4").setValues([arrayParam.slice(0, 7)]);
 
-    // Increment rowVar . . .
+  //  In the spreadsheet, cell G4 (number of quantiles) has a value only if the user
+  //  picked the quantiles function in the function dropdown. Cell G4 has a " " value
+  //  for the other functions. The arrayParam[6] element will always have a value,
+  //  but for a non-quantiles function, it will have a " " value. Always show the
+  //  quantiles value in G4, but change the cell background color: light gray for
+  //  " " and white for an actual number value . . .
 
-    rowVar++;
-
-    // Add close row / start row tags to resultsString to start
-    // a new row. This will work for all rows but with this, the
-    // last row will have an unmatched <tr> tag. Manually delete
-    // this tag later on . . 
-
-    resultsString += '</tr><tr>';
+  if (arrayParam[6] == " ") {
+    localSpreadSheet.getRange('G4').setBackground("lightgray");
+  }
+  else {
+    localSpreadSheet.getRange('G4').setBackground("white");
   }
 
-  // The while loop adds '</tr><tr>' to resultsString. This will leave an extra '<tr>'
-  // at the end of resultsString when the loop finishes, so trim that last <tr> tag
-  // from resultsString . . .
+  var returnParam = ' ';
+  returnParam = runQuery(queryString);
+  
+  return returnParam;
+}
 
-  return resultsString.slice(0, -4);
+function runQuery(queryString) {
+
+  //  If the user already ran the app with the quantiles function
+  //  and the quantiles function returned an empty result set,
+  //  runQuery will gray out cell B7 to help illustrate the
+  //  situation. Therefore, initialize the cell B7 background
+  //  color . . .
+
+  localSpreadSheet.getRange('B7').setBackground("white");
+
+  // Replace this value with the project ID listed
+  // in the Google Developers Console project . . .
+
+  var projectId = '                ;
+  var request = {query: queryString};
+  var queryResults = BigQuery.Jobs.query(request, projectId);
+  var jobId = queryResults.jobReference.jobId;
+
+  // Get the entire result set . . .
+
+  var rows = queryResults.rows;
+
+  while (queryResults.pageToken) {
+    queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId, {
+      pageToken: queryResults.pageToken
+    });
+    rows = rows.concat(queryResults.rows);
+  }
+
+  //  The headers array has the result
+  //  set column names . . .
+
+  var headers = queryResults.schema.fields.map(function(field) {
+    return field.name;
+  });
+  
+  //  The result set data will go into a
+  //  nested array that will work as an
+  //  array of arrays. The inner array(s)
+  //  will have two values . . .
+
+  var dataArray = [[]];
+
+  //  In dataArray, dataArray[0][0] has the function
+  //  name and dataArray[0][1] has the calculated
+  //  value BigQuery returned . . .
+
+  dataArray[0][0] = removeEscapeCharacters(headers[0]);
+
+  if (headers.length == 1) {
+
+    //  The headers[] array has one element, so the user picked a single-value
+    //  result set function. If BigQuery returned NULL for the chosen parameters,
+    //  place an information string in dataArray[0][1]; otherwise, place the
+    //  returned non-null value in dataArray[0][1] . . .
+
+    dataArray[0][1] = (rows[0].f[0].v === null) ? "No value calculated for chosen parameters" : rows[0].f[0].v;
+
+  } else if (headers.length == 2) {
+
+    //  The user picked a two-column result
+    //  set - specifically, the quantiles
+    //  function . . .
+
+    dataArray[0][1] = removeEscapeCharacters(headers[1]);
+
+    if (rows.length < 2) {
+
+      //  The BigQuery quantiles function returned
+      //  zero data rows for the parameters, so
+      //  first, gray out cell B7 as a visual guide,
+      //  and build a two-cell array that explains
+      //  everything . . .
+
+      localSpreadSheet.getRange('B7').setBackground("lightgray");
+
+      var tempArray = new Array(2);
+
+      tempArray[0] = " ";
+      tempArray[1] = "No quantile values calculated for chosen parameters";
+
+      //  The slice() method guarantees that tempArray[] will
+      //  have the new values from the sourcing rows[] array.
+      //  Without slice(), the push method will push arrays
+      //  referenced by the last tempArray it pushed in this
+      //  loop . . .
+
+      dataArray.push(tempArray.slice());
+    } else {
+
+      //  Array tempArray will hold the quantile / quantile value pairs . . .
+
+      var tempArray = new Array(2);
+
+      for (var i = 0; i < rows.length; i++) {
+        tempArray[0] = rows[i].f[0].v;
+        tempArray[1] = rows[i].f[1].v;
+
+        //  The slice() method guarantees that tempArray[] will
+        //  have the new values from the sourcing rows[] array.
+        //  Without slice(), the push method will push arrays
+        //  referenced by the last tempArray it pushed in this
+        //  loop . . .
+
+        dataArray.push(tempArray.slice());
+      }
+    }
+  }
+
+  //  The dataArray array now has all the result set data. Nested loops could certainly
+  //  place the dataArray array values in the spreadsheet cells, but it would take forever.
+  //  Instead, place the entire assembled dataArray array in the spreadsheet, at the target
+  //  location all at once. This will boost the speed.
+  //
+  //  The getRange function specifies the target location which starts at B6, extends to
+  //  column C, and down to the row matching the length of dataArray[0]. Here, dataArray[0].length
+  //  is the column length - AKA the number of quantile / quantile value pairs. Add 5 (five)
+  //  because targetRange has five blank rows above it . . .
+
+  var targetRange = "B6:C" + (dataArray.length + 5); 
+
+  localSpreadSheet.getRange(targetRange).setValues(dataArray);
+
+  //  This function will return the dataArray array to
+  //  calling function returnFormParam in this file.
+  //  Then, returnFormParam will return the dataArray
+  //  array it to function callBack() in
+  //  BigQueryDemoApp.html . . .
+
+  return dataArray;
+}
+
+function removeEscapeCharacters (headerColString) {
+
+  //  This function removes the escaped characters
+  //  from the column aliases . . .
+
+  headerColString = headerColString.replace(/_/g, ' ');
+  headerColString = headerColString.replace(/x24/g, '$');
+  headerColString = headerColString.replace(/x28/g, '(');
+  headerColString = headerColString.replace(/x29/g, ')');
+  headerColString = headerColString.replace(/x3d/g, '=');
+  headerColString = headerColString.replace(/x5e/g, '^');
+
+  return headerColString;
 }
