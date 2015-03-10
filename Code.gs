@@ -167,7 +167,7 @@ function runQuery(queryString) {
   // Replace this value with the project ID listed
   // in the Google Developers Console project . . .
 
-  var projectId = '                ;
+  var projectId = '                ';
   var request = {query: queryString};
   var queryResults = BigQuery.Jobs.query(request, projectId);
   var jobId = queryResults.jobReference.jobId;
