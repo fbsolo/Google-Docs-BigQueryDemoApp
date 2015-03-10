@@ -369,6 +369,8 @@
           //  result set cells . . .
 
           $('#lastRow').nextAll().remove();
+          
+          google.script.run.withFailureHandler().withSuccessHandler().clearSheet();
         });
       });
 
